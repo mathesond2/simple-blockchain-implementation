@@ -109,12 +109,12 @@ class BlockChain {
     return this.blockchain.find((block: Block) => block.hash === hash);
   }
 
-  // getCurrentBalance(account: Account) {
-  //   const foundAcct = Object.keys(this.state).find(acct => acct === account);
-  //   if (foundAcct) {
-  //     return this.state[foundAcct];
-  //   }
-  // }
+  getCurrentBalance(account: Account) {
+    const foundAcct = Object.keys(this.state).find(acct => acct === account);
+    if (foundAcct) {
+      return this.state[foundAcct];
+    }
+  }
 
   isValidChain() {
     for (let i = 1; i < this.blockchain.length; i++) {
@@ -144,8 +144,10 @@ const chain = new BlockChain(1);
 chain.addNewBlock(a);
 chain.addNewBlock(b);
 // chain.addNewBlock(c);
+const acctBalance = chain.getCurrentBalance(acctB);
 
 console.log(chain);
+console.log('acctBalance', acctBalance);
 console.log(`is valid chain: ${chain.isValidChain()}`);
 
 export default {};

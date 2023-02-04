@@ -86,12 +86,12 @@ var BlockChain = /** @class */ (function () {
     BlockChain.prototype.getBlock = function (hash) {
         return this.blockchain.find(function (block) { return block.hash === hash; });
     };
-    // getCurrentBalance(account: Account) {
-    //   const foundAcct = Object.keys(this.state).find(acct => acct === account);
-    //   if (foundAcct) {
-    //     return this.state[foundAcct];
-    //   }
-    // }
+    BlockChain.prototype.getCurrentBalance = function (account) {
+        var foundAcct = Object.keys(this.state).find(function (acct) { return acct === account; });
+        if (foundAcct) {
+            return this.state[foundAcct];
+        }
+    };
     BlockChain.prototype.isValidChain = function () {
         for (var i = 1; i < this.blockchain.length; i++) {
             var currBlock = this.blockchain[i];
@@ -116,6 +116,8 @@ var chain = new BlockChain(1);
 chain.addNewBlock(a);
 chain.addNewBlock(b);
 // chain.addNewBlock(c);
+var acctBalance = chain.getCurrentBalance(acctB);
 console.log(chain);
+console.log('acctBalance', acctBalance);
 console.log("is valid chain: ".concat(chain.isValidChain()));
 exports["default"] = {};
