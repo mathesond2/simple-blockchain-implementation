@@ -1,4 +1,5 @@
-const sha256 = require('crypto-js/sha256');
+// const sha256 = require('crypto-js/sha256');
+import * as sha256 from 'crypto-js/sha256';
 
 type Account = 'accountA' | 'accountB';
 
@@ -129,8 +130,6 @@ class BlockChain {
   }
 }
 
-
-
 const a = new Block({from: acctA, to: acctB, value: 10})
 const b = new Block({from: acctB, to: acctA, value: 5})
 
@@ -139,3 +138,5 @@ chain.addNewBlock(a);
 chain.addNewBlock(b);
 console.log(chain);
 console.log(`is valid chain: ${chain.isValidChain()}`);
+
+export default {};

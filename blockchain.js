@@ -1,4 +1,7 @@
-var sha256 = require('crypto-js/sha256');
+"use strict";
+exports.__esModule = true;
+// const sha256 = require('crypto-js/sha256');
+var sha256 = require("crypto-js/sha256");
 var acctA = 'accountA';
 var acctB = 'accountB';
 var Block = /** @class */ (function () {
@@ -69,7 +72,6 @@ var BlockChain = /** @class */ (function () {
     };
     BlockChain.prototype.addNewBlock = function (newBlock) {
         if (!this.isValidBlock(newBlock)) {
-            console.log('hitting ');
             return;
         }
         newBlock.prevHash = this.getLatestBlock().hash;
@@ -110,3 +112,4 @@ chain.addNewBlock(a);
 chain.addNewBlock(b);
 console.log(chain);
 console.log("is valid chain: ".concat(chain.isValidChain()));
+exports["default"] = {};
