@@ -60,17 +60,20 @@ var BlockChain = /** @class */ (function () {
         });
         return txnValidityList.every(function (txn) { return txn === true; });
     };
-    // calculateNewState(txn: Txn[]) {
-    //   let { accountA, accountB } = this.state;
-    //   if (txn.from === acctA) {
-    //     accountA -= txn.value;
-    //     accountB += txn.value;
-    //   } else {
-    //     accountB -= txn.value;
-    //     accountA += txn.value;
-    //   }
-    //   return {accountA, accountB};
-    // }
+    BlockChain.prototype.calculateNewState = function (txns) {
+        var _a = this.state, accountA = _a.accountA, accountB = _a.accountB;
+        txns.map(function (txn) {
+            if (txn.from === acctA) {
+                accountA -= txn.value;
+                accountB += txn.value;
+            }
+            else {
+                accountB -= txn.value;
+                accountA += txn.value;
+            }
+        });
+        return { accountA: accountA, accountB: accountB };
+    };
     BlockChain.prototype.addNewBlock = function (newBlock) {
         if (!this.isValidBlock(newBlock)) {
             return;
@@ -78,7 +81,7 @@ var BlockChain = /** @class */ (function () {
         newBlock.prevHash = this.getLatestBlock().hash;
         newBlock.hash = newBlock.computeHash();
         this.blockchain.push(newBlock);
-        // this.state = this.calculateNewState(newBlock.txns);
+        this.state = this.calculateNewState(newBlock.txns);
     };
     BlockChain.prototype.getBlock = function (hash) {
         return this.blockchain.find(function (block) { return block.hash === hash; });

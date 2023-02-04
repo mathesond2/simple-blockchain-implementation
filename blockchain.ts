@@ -81,17 +81,19 @@ class BlockChain {
     return txnValidityList.every(txn => txn === true);
   }
 
-  // calculateNewState(txn: Txn[]) {
-  //   let { accountA, accountB } = this.state;
-  //   if (txn.from === acctA) {
-  //     accountA -= txn.value;
-  //     accountB += txn.value;
-  //   } else {
-  //     accountB -= txn.value;
-  //     accountA += txn.value;
-  //   }
-  //   return {accountA, accountB};
-  // }
+  calculateNewState(txns: Txn[]) {
+    let { accountA, accountB } = this.state;
+    txns.map(txn => {
+      if (txn.from === acctA) {
+        accountA -= txn.value;
+        accountB += txn.value;
+      } else {
+        accountB -= txn.value;
+        accountA += txn.value;
+      }
+    });
+    return {accountA, accountB};
+  }
 
   addNewBlock(newBlock: Block) {
     if (!this.isValidBlock(newBlock)) {
@@ -100,7 +102,7 @@ class BlockChain {
     newBlock.prevHash = this.getLatestBlock().hash;
     newBlock.hash = newBlock.computeHash();
     this.blockchain.push(newBlock);
-    // this.state = this.calculateNewState(newBlock.txns);
+    this.state = this.calculateNewState(newBlock.txns);
   }
 
   getBlock(hash: string): Block | undefined {
