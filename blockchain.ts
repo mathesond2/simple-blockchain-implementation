@@ -65,9 +65,9 @@ class BlockChain {
     return this.blockchain.find(block => block.hash === hash);
   }
 
-  getAccountBalance(account) {
-    return this.state.find(state => state.account === account);
-  }
+  // getAccountBalance(account) {
+  //   return this.state.find(state => state.account === account);
+  // }
 
   isValidChain() { // Check to see that all the hashes are correct and the chain is therefore valid
     for (let i = 1; i < this.blockchain.length; i++) { // Iterate through, starting after the genesis block
