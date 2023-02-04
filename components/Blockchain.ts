@@ -1,6 +1,5 @@
 import Block from './Block';
-import type { Txn, Account } from '../util/types';
-import { acctA, acctB } from '../util/constants';
+import type { Txn } from '../util/types';
 
 interface iBlockChain {
   getLatestBlock(): Block;
@@ -9,20 +8,18 @@ interface iBlockChain {
   isValidChain(): boolean;
 }
 
+type StateAccount = {[address: string]: number};
+
 export default class BlockChain implements iBlockChain {
   private _blockchain: Block[];
-  private _state: {
-    accountA: number,
-    accountB: number,
-  };
+  private _state: StateAccount[];
 
   constructor(public blockSize: number) {
     this._blockchain = [this._startGenesisBlock()];
     this.blockSize = blockSize;
-    this._state = {
-      accountA: 0,
-      accountB: 0,
-    };
+    this._state = [
+      {'accountA': 4} // seed account
+    ];
   }
 
   private _startGenesisBlock() {
@@ -37,10 +34,10 @@ export default class BlockChain implements iBlockChain {
     return this._blockchain.find((block: Block) => block.hash === hash);
   }
 
-  public getCurrentBalance(account: Account) {
-    const foundAcct = Object.keys(this._state).find(acct => acct === account);
+  public getCurrentBalance(account: string) {
+    const foundAcct = this._state.find(obj => obj[account] || obj[account] === 0);
     if (foundAcct) {
-      return this._state[foundAcct];
+      return foundAcct[account];
     }
   }
 
@@ -54,18 +51,42 @@ export default class BlockChain implements iBlockChain {
     this._state = this._calculateNewState(newBlock.txns);
   }
 
+  private _getAccountFromState(account: string) {
+    return this._state.find(obj => Object.keys(obj)[0] === account);
+  }
+
   private _calculateNewState(txns: Txn[]) {
-    let { accountA, accountB } = this._state;
     txns.map(txn => {
-      if (txn.from === acctA) {
-        accountA -= txn.value;
-        accountB += txn.value;
-      } else {
-        accountB -= txn.value;
-        accountA += txn.value;
+      const fromAcct = this._getAccountFromState(txn.from);
+      let toAcct = this._getAccountFromState(txn.to);
+
+      // if 'from' account doesn't exist or doesn't have enough funds, return
+      if (!fromAcct || Object.values(fromAcct)[0] - txn.value < 0) {
+        return;
       }
+
+      // if 'to' account doesn't exist, create it
+      if (!toAcct) {
+        this._state = [
+          ...this._state,
+          {[txn.to]: 0}
+        ];
+      }
+
+      this._state = this._state.map(acct => {
+        const key = Object.keys(acct)[0];
+        const val = Object.values(acct)[0];
+
+        if (key === txn.from) {
+          return {[txn.from]: val - txn.value};
+        } else if (key === txn.to) {
+          return {[txn.to]: val + txn.value};
+        } else {
+          return acct;
+        }
+      });
     });
-    return {accountA, accountB};
+    return this._state;
   }
 
   private _isValidBlock(newBlock: Block) {
@@ -75,29 +96,17 @@ export default class BlockChain implements iBlockChain {
       return false;
     }
 
-    const txnValidityList = txns.map(txn => {
-      const txnKeys = Object.keys(txn);
-      const isSendingValueToAnotherAcct = txnKeys.map(key => {
-        if (key === 'from') {
-          if (txn[key] === acctA && txn.to === acctB) {
-            return true;
-          } else if (txn[key] === acctB && txn.to === acctA) {
-            return true;
-          }
-
-          return false;
-        }
-      });
-
-      if (isSendingValueToAnotherAcct.some(key => key === false)) {
+    const txValidityList = txns.map(tx => {
+      if (tx.from === tx.to) {
         return false;
-      };
+      }
 
+      const txnKeys = Object.keys(tx);
       const areCorrectKeys = txnKeys.map(key => ['from', 'to', 'value'].includes(key) ? true : false);
       return areCorrectKeys.every(key => key === true);
     });
 
-    return txnValidityList.every(txn => txn === true);
+    return txValidityList.every(txn => txn === true);
   }
 
   public isValidChain() {
