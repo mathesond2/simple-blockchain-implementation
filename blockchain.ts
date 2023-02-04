@@ -61,7 +61,7 @@ class BlockChain {
     }
   }
 
-  addNewBlock(newBlock: Block) {
+  addBlock(newBlock: Block) {
     if (!this.isValidBlock(newBlock)) {
       return;
     }
@@ -122,12 +122,10 @@ class BlockChain {
       const currBlock = this.blockchain[i];
       const prevBlock = this.blockchain[i -1];
 
-      // Is the hash correctly computed, or was it tampered with?
       if (currBlock.hash !== currBlock.computeHash()) {
         return false;
       }
 
-      // Does it have the correct prevHash value?; ie: What a previous block tampered with?
       if (currBlock.prevHash !== prevBlock.hash) {
         return false;
       }
@@ -141,10 +139,11 @@ const b = new Block([{from: acctB, to: acctA, value: 1}])
 // const c = new Block({from: acctB, to: acctA, value: 1})
 
 const chain = new BlockChain(1);
+const lastBlock = chain.getBlockAtAddress('1a3f3c893709c2f98bfaf9df36d4a90609388e16547007c6d6170f3f227e7509')
 
-chain.addNewBlock(a);
-chain.addNewBlock(b);
-// chain.addNewBlock(c);
+chain.addBlock(a);
+chain.addBlock(b);
+// chain.addBlock(c);
 const acctBalance = chain.getCurrentBalance(acctB);
 
 
@@ -152,5 +151,6 @@ console.log(chain);
 console.log('acctBalance', acctBalance);
 console.log(`is valid chain: ${chain.isValidChain()}`);
 
-console.log('block at last address', chain.getBlockAtAddress('1a3f3c893709c2f98bfaf9df36d4a90609388e16547007c6d6170f3f227e7509'));
+console.log('lastBlock', lastBlock);
+
 export default {};
