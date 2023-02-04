@@ -1,6 +1,5 @@
 "use strict";
 exports.__esModule = true;
-// const sha256 = require('crypto-js/sha256');
 var sha256 = require("crypto-js/sha256");
 var acctA = 'accountA';
 var acctB = 'accountB';
@@ -105,11 +104,15 @@ var BlockChain = /** @class */ (function () {
     };
     return BlockChain;
 }());
-var a = new Block({ from: acctA, to: acctB, value: 10 });
-var b = new Block({ from: acctB, to: acctA, value: 5 });
-var chain = new BlockChain(2);
+var a = new Block({ from: acctA, to: acctB, value: 5 });
+var b = new Block({ from: acctB, to: acctA, value: 1 });
+var c = new Block({ from: acctB, to: acctA, value: 1 });
+var chain = new BlockChain(1);
 chain.addNewBlock(a);
+console.log(chain);
 chain.addNewBlock(b);
+console.log(chain);
+chain.addNewBlock(c);
 console.log(chain);
 console.log("is valid chain: ".concat(chain.isValidChain()));
 exports["default"] = {};
