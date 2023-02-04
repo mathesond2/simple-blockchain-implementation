@@ -1,5 +1,5 @@
 import * as sha256 from 'crypto-js/sha256';
-import type { Txn } from './util/types';
+import type { Txn } from '../util/types';
 
 interface iBlock {
   hash: string;
