@@ -1,4 +1,4 @@
-import * as sha256 from 'crypto-js/sha256';
+import * as crypto from 'crypto';
 import type { Tx } from '../util/types';
 
 interface iBlock {
@@ -20,6 +20,6 @@ export default class Block implements iBlock {
   }
 
   public computeHash(): string {
-    return sha256(this.prevHash + JSON.stringify(this.txns)).toString();
+    return crypto.createHash('sha256').update(this.prevHash + JSON.stringify(this.txns)).digest('hex');
   }
 }
