@@ -1,6 +1,6 @@
 import Block from './Block';
-import type { Txn } from '../util/types';
-
+import type { Tx } from '../util/types';
+import { seedUUID } from '../util/constants';
 interface iBlockChain {
   getLatestBlock(): Block;
   getBlockAtAddress(hash: string): Block | undefined;
@@ -17,13 +17,11 @@ export default class BlockChain implements iBlockChain {
   constructor(public blockSize: number) {
     this._blockchain = [this._startGenesisBlock()];
     this.blockSize = blockSize;
-    this._state = [
-      {'accountA': 4} // seed account
-    ];
+    this._state = [{[`${seedUUID}`]: 4}];
   }
 
   private _startGenesisBlock() {
-    return new Block([{}] as Txn[]);
+    return new Block([{}] as Tx[]);
   }
 
   public getLatestBlock() {
@@ -55,7 +53,7 @@ export default class BlockChain implements iBlockChain {
     return this._state.find(obj => Object.keys(obj)[0] === account);
   }
 
-  private _calculateNewState(txns: Txn[]) {
+  private _calculateNewState(txns: Tx[]) {
     txns.map(txn => {
       const fromAcct = this._getAccountFromState(txn.from);
       let toAcct = this._getAccountFromState(txn.to);

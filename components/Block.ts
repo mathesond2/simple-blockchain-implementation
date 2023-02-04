@@ -1,9 +1,9 @@
 import * as sha256 from 'crypto-js/sha256';
-import type { Txn } from '../util/types';
+import type { Tx } from '../util/types';
 
 interface iBlock {
   hash: string;
-  txns: Txn[];
+  txns: Tx[];
   prevHash: string;
   computeHash(): string;
 }
@@ -11,7 +11,7 @@ interface iBlock {
 export default class Block implements iBlock {
   hash: string;
   constructor(
-    public txns: Txn[],
+    public txns: Tx[],
     public prevHash: string = '',
   ) {
     this.txns = txns;
