@@ -4,16 +4,16 @@ var sha256 = require("crypto-js/sha256");
 var acctA = 'accountA';
 var acctB = 'accountB';
 var Block = /** @class */ (function () {
-    function Block(txn, prevHash) {
+    function Block(txns, prevHash) {
         if (prevHash === void 0) { prevHash = ''; }
-        this.txn = txn;
+        this.txns = txns;
         this.prevHash = prevHash;
-        this.txn = txn;
+        this.txns = txns;
         this.prevHash = prevHash;
         this.hash = this.computeHash();
     }
     Block.prototype.computeHash = function () {
-        return sha256(this.prevHash + JSON.stringify(this.txn)).toString();
+        return sha256(this.prevHash + JSON.stringify(this.txns)).toString();
     };
     return Block;
 }());
@@ -28,47 +28,49 @@ var BlockChain = /** @class */ (function () {
         };
     }
     BlockChain.prototype.startGenesisBlock = function () {
-        return new Block({});
+        return new Block([{}]);
     };
     BlockChain.prototype.getLatestBlock = function () {
         return this.blockchain[this.blockchain.length - 1];
     };
     BlockChain.prototype.isValidBlock = function (newBlock) {
-        var txn = newBlock.txn;
-        var txnKeys = Object.keys(txn);
-        // if (txn.length !== this.blockSize) {
-        //   return false;
-        // }
-        var isSendingValueToAnotherAcct = txnKeys.map(function (key) {
-            if (key === 'from') {
-                if (txn[key] === acctA && txn.to === acctB) {
-                    return true;
-                }
-                else if (txn[key] === acctB && txn.to === acctA) {
-                    return true;
-                }
-                return false;
-            }
-        });
-        if (isSendingValueToAnotherAcct.some(function (key) { return key === false; })) {
+        var txns = newBlock.txns;
+        if (txns.length !== this.blockSize) {
             return false;
         }
-        ;
-        var areCorrectKeys = txnKeys.map(function (key) { return ['from', 'to', 'value'].includes(key) ? true : false; });
-        return areCorrectKeys.every(function (key) { return key === true; });
+        var txnValidityList = txns.map(function (txn) {
+            var txnKeys = Object.keys(txn);
+            var isSendingValueToAnotherAcct = txnKeys.map(function (key) {
+                if (key === 'from') {
+                    if (txn[key] === acctA && txn.to === acctB) {
+                        return true;
+                    }
+                    else if (txn[key] === acctB && txn.to === acctA) {
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            if (isSendingValueToAnotherAcct.some(function (key) { return key === false; })) {
+                return false;
+            }
+            ;
+            var areCorrectKeys = txnKeys.map(function (key) { return ['from', 'to', 'value'].includes(key) ? true : false; });
+            return areCorrectKeys.every(function (key) { return key === true; });
+        });
+        return txnValidityList.every(function (txn) { return txn === true; });
     };
-    BlockChain.prototype.calculateNewState = function (txn) {
-        var _a = this.state, accountA = _a.accountA, accountB = _a.accountB;
-        if (txn.from === acctA) {
-            accountA -= txn.value;
-            accountB += txn.value;
-        }
-        else {
-            accountB -= txn.value;
-            accountA += txn.value;
-        }
-        return { accountA: accountA, accountB: accountB };
-    };
+    // calculateNewState(txn: Txn[]) {
+    //   let { accountA, accountB } = this.state;
+    //   if (txn.from === acctA) {
+    //     accountA -= txn.value;
+    //     accountB += txn.value;
+    //   } else {
+    //     accountB -= txn.value;
+    //     accountA += txn.value;
+    //   }
+    //   return {accountA, accountB};
+    // }
     BlockChain.prototype.addNewBlock = function (newBlock) {
         if (!this.isValidBlock(newBlock)) {
             return;
@@ -76,7 +78,7 @@ var BlockChain = /** @class */ (function () {
         newBlock.prevHash = this.getLatestBlock().hash;
         newBlock.hash = newBlock.computeHash();
         this.blockchain.push(newBlock);
-        this.state = this.calculateNewState(newBlock.txn);
+        // this.state = this.calculateNewState(newBlock.txns);
     };
     BlockChain.prototype.getBlock = function (hash) {
         return this.blockchain.find(function (block) { return block.hash === hash; });
@@ -104,15 +106,13 @@ var BlockChain = /** @class */ (function () {
     };
     return BlockChain;
 }());
-var a = new Block({ from: acctA, to: acctB, value: 5 });
-var b = new Block({ from: acctB, to: acctA, value: 1 });
-var c = new Block({ from: acctB, to: acctA, value: 1 });
+var a = new Block([{ from: acctA, to: acctB, value: 5 }]);
+var b = new Block([{ from: acctB, to: acctA, value: 1 }]);
+// const c = new Block({from: acctB, to: acctA, value: 1})
 var chain = new BlockChain(1);
 chain.addNewBlock(a);
-console.log(chain);
 chain.addNewBlock(b);
-console.log(chain);
-chain.addNewBlock(c);
+// chain.addNewBlock(c);
 console.log(chain);
 console.log("is valid chain: ".concat(chain.isValidChain()));
 exports["default"] = {};

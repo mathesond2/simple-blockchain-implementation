@@ -13,16 +13,16 @@ const acctB = 'accountB';
 class Block {
   hash: string;
   constructor(
-    public txn: Txn,
+    public txns: Txn[],
     public prevHash: string = '',
   ) {
-    this.txn = txn;
+    this.txns = txns;
     this.prevHash = prevHash;
     this.hash = this.computeHash();
   }
 
   computeHash(): string {
-    return sha256(this.prevHash + JSON.stringify(this.txn)).toString();
+    return sha256(this.prevHash + JSON.stringify(this.txns)).toString();
   }
 }
 
@@ -42,7 +42,7 @@ class BlockChain {
   }
 
   startGenesisBlock() {
-    return new Block({} as Txn);
+    return new Block([{}] as Txn[]);
   }
 
   getLatestBlock() {
@@ -50,44 +50,48 @@ class BlockChain {
   }
 
   isValidBlock(newBlock: Block) {
-    const { txn } = newBlock;
-    const txnKeys = Object.keys(txn);
+    const { txns } = newBlock;
 
-    // if (txn.length !== this.blockSize) {
-    //   return false;
-    // }
+    if (txns.length !== this.blockSize) {
+      return false;
+    }
 
-    const isSendingValueToAnotherAcct = txnKeys.map(key => {
-      if (key === 'from') {
-        if (txn[key] === acctA && txn.to === acctB) {
-          return true;
-        } else if (txn[key] === acctB && txn.to === acctA) {
-          return true;
+    const txnValidityList = txns.map(txn => {
+      const txnKeys = Object.keys(txn);
+      const isSendingValueToAnotherAcct = txnKeys.map(key => {
+        if (key === 'from') {
+          if (txn[key] === acctA && txn.to === acctB) {
+            return true;
+          } else if (txn[key] === acctB && txn.to === acctA) {
+            return true;
+          }
+
+          return false;
         }
+      });
 
+      if (isSendingValueToAnotherAcct.some(key => key === false)) {
         return false;
-      }
+      };
+
+      const areCorrectKeys = txnKeys.map(key => ['from', 'to', 'value'].includes(key) ? true : false);
+      return areCorrectKeys.every(key => key === true);
     });
 
-    if (isSendingValueToAnotherAcct.some(key => key === false)) {
-      return false;
-    };
-
-    const areCorrectKeys = txnKeys.map(key => ['from', 'to', 'value'].includes(key) ? true : false);
-    return areCorrectKeys.every(key => key === true);
+    return txnValidityList.every(txn => txn === true);
   }
 
-  calculateNewState(txn: Txn) {
-    let { accountA, accountB } = this.state;
-    if (txn.from === acctA) {
-      accountA -= txn.value;
-      accountB += txn.value;
-    } else {
-      accountB -= txn.value;
-      accountA += txn.value;
-    }
-    return {accountA, accountB};
-  }
+  // calculateNewState(txn: Txn[]) {
+  //   let { accountA, accountB } = this.state;
+  //   if (txn.from === acctA) {
+  //     accountA -= txn.value;
+  //     accountB += txn.value;
+  //   } else {
+  //     accountB -= txn.value;
+  //     accountA += txn.value;
+  //   }
+  //   return {accountA, accountB};
+  // }
 
   addNewBlock(newBlock: Block) {
     if (!this.isValidBlock(newBlock)) {
@@ -96,7 +100,7 @@ class BlockChain {
     newBlock.prevHash = this.getLatestBlock().hash;
     newBlock.hash = newBlock.computeHash();
     this.blockchain.push(newBlock);
-    this.state = this.calculateNewState(newBlock.txn);
+    // this.state = this.calculateNewState(newBlock.txns);
   }
 
   getBlock(hash: string): Block | undefined {
@@ -129,15 +133,15 @@ class BlockChain {
   }
 }
 
-const a = new Block({from: acctA, to: acctB, value: 5})
-const b = new Block({from: acctB, to: acctA, value: 1})
-const c = new Block({from: acctB, to: acctA, value: 1})
+const a = new Block([{from: acctA, to: acctB, value: 5}])
+const b = new Block([{from: acctB, to: acctA, value: 1}])
+// const c = new Block({from: acctB, to: acctA, value: 1})
 
 const chain = new BlockChain(1);
 
 chain.addNewBlock(a);
 chain.addNewBlock(b);
-chain.addNewBlock(c);
+// chain.addNewBlock(c);
 
 console.log(chain);
 console.log(`is valid chain: ${chain.isValidChain()}`);
