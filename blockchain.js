@@ -44,7 +44,6 @@ class BlockChain {
 
   addNewBlock(newBlock) {
     if (!this.isValidBlock(newBlock)) {
-      console.log('hitting here');
       return;
     }
     newBlock.prevHash = this.getLatestBlock().hash; // Set its previous hash to the correct value
@@ -89,4 +88,4 @@ chain.addNewBlock(a);
 chain.addNewBlock(b);
 chain.addNewBlock(c);
 console.log(chain);
-console.log("Validity: " + chain.isValidChain());
+console.log(`is valid chain: ${chain.isValidChain()}`);
