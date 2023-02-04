@@ -8,8 +8,7 @@ class Block {
   }
 
   computeHash() {
-    let strBlock = this.prevHash + JSON.stringify(this.data);
-    return sha256(strBlock).toString();
+    return sha256(this.prevHash + JSON.stringify(this.data)).toString();
   }
 }
 
@@ -27,8 +26,27 @@ class BlockChain {
   getLatestBlock() {
     return this.blockchain[this.blockchain.length - 1];
   }
+  //TODO: implement TS
+  isValidBlock(newBlock) {
+    const { txns } = newBlock;
+    if (typeof txns !== 'object') { // remove upon implementing TS
+      return false;
+    }
+
+    const txnKeys = Object.keys(txns);
+    if (txnKeys.length !== this.blockSize) {
+      return false;
+    }
+
+    const areCorrectKeys = txnKeys.map(key => ['from', 'to'].includes(key) ? true : false);
+    return areCorrectKeys.every(key => key === true);
+  }
 
   addNewBlock(newBlock) {
+    if (!this.isValidBlock(newBlock)) {
+      console.log('hitting here');
+      return;
+    }
     newBlock.prevHash = this.getLatestBlock().hash; // Set its previous hash to the correct value
     newBlock.hash = newBlock.computeHash(); // Recalculate its hash with this new prevHash value
     this.blockchain.push(newBlock); // Add the block to our chain
@@ -43,7 +61,7 @@ class BlockChain {
     return this.state.find(state => state.acount === acount);
   }
 
-  checkChainValidity() { // Check to see that all the hashes are correct and the chain is therefore valid
+  isValidChain() { // Check to see that all the hashes are correct and the chain is therefore valid
     for (let i = 1; i < this.blockchain.length; i++) { // Iterate through, starting after the genesis block
       const currBlock = this.blockchain[i];
       const prevBlock = this.blockchain[i -1];
@@ -62,13 +80,13 @@ class BlockChain {
   }
 }
 
-// Create two test blocks with some sample data
-let a = new Block({from: "Joe", to: "Jane"})
-let b = new Block({from: "Jane", to: "Joe"})
+const a = new Block({from: "Joe", to: "Jane"})
+const b = new Block({from: "Jane", to: "Joe"})
+const c = new Block({from: "Jane", ton: "Joe"})
 
-
-let chain = new BlockChain();
+const chain = new BlockChain();
 chain.addNewBlock(a);
 chain.addNewBlock(b);
+chain.addNewBlock(c);
 console.log(chain);
-console.log("Validity: " + chain.checkChainValidity());
+console.log("Validity: " + chain.isValidChain());
