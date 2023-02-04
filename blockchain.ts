@@ -7,10 +7,23 @@ type Txn = {
   to: Account,
   value: number,
 };
+interface iBlock {
+  hash: string;
+  txns: Txn[];
+  prevHash: string;
+  computeHash(): string;
+}
+
+interface iBlockChain {
+  getLatestBlock(): Block;
+  getBlockAtAddress(hash: string): Block | undefined;
+  addBlock(newBlock: Block): void;
+  isValidChain(): boolean;
+}
 
 const acctA = 'accountA';
 const acctB = 'accountB';
-class Block {
+class Block implements iBlock {
   hash: string;
   constructor(
     public txns: Txn[],
@@ -21,58 +34,58 @@ class Block {
     this.hash = this.computeHash();
   }
 
-  computeHash(): string {
+  public computeHash(): string {
     return sha256(this.prevHash + JSON.stringify(this.txns)).toString();
   }
 }
 
-class BlockChain {
-  public blockchain: Block[];
-  public state: {
+class BlockChain implements iBlockChain {
+  private _blockchain: Block[];
+  private _state: {
     accountA: number,
     accountB: number,
   };
 
   constructor(public blockSize: number) {
-    this.blockchain = [this.startGenesisBlock()];
+    this._blockchain = [this._startGenesisBlock()];
     this.blockSize = blockSize;
-    this.state = {
+    this._state = {
       accountA: 0,
       accountB: 0,
     };
   }
 
-  startGenesisBlock() {
+  private _startGenesisBlock() {
     return new Block([{}] as Txn[]);
   }
 
-  getLatestBlock() {
-    return this.blockchain[this.blockchain.length - 1];
+  public getLatestBlock() {
+    return this._blockchain[this._blockchain.length - 1];
   }
 
-  getBlockAtAddress(hash: string): Block | undefined {
-    return this.blockchain.find((block: Block) => block.hash === hash);
+  public getBlockAtAddress(hash: string): Block | undefined {
+    return this._blockchain.find((block: Block) => block.hash === hash);
   }
 
-  getCurrentBalance(account: Account) {
-    const foundAcct = Object.keys(this.state).find(acct => acct === account);
+  public getCurrentBalance(account: Account) {
+    const foundAcct = Object.keys(this._state).find(acct => acct === account);
     if (foundAcct) {
-      return this.state[foundAcct];
+      return this._state[foundAcct];
     }
   }
 
-  addBlock(newBlock: Block) {
-    if (!this.isValidBlock(newBlock)) {
+  public addBlock(newBlock: Block) {
+    if (!this._isValidBlock(newBlock)) {
       return;
     }
     newBlock.prevHash = this.getLatestBlock().hash;
     newBlock.hash = newBlock.computeHash();
-    this.blockchain.push(newBlock);
-    this.state = this.calculateNewState(newBlock.txns);
+    this._blockchain.push(newBlock);
+    this._state = this._calculateNewState(newBlock.txns);
   }
 
-  calculateNewState(txns: Txn[]) {
-    let { accountA, accountB } = this.state;
+  private _calculateNewState(txns: Txn[]) {
+    let { accountA, accountB } = this._state;
     txns.map(txn => {
       if (txn.from === acctA) {
         accountA -= txn.value;
@@ -85,7 +98,7 @@ class BlockChain {
     return {accountA, accountB};
   }
 
-  isValidBlock(newBlock: Block) {
+  private _isValidBlock(newBlock: Block) {
     const { txns } = newBlock;
 
     if (txns.length !== this.blockSize) {
@@ -117,10 +130,10 @@ class BlockChain {
     return txnValidityList.every(txn => txn === true);
   }
 
-  isValidChain() {
-    for (let i = 1; i < this.blockchain.length; i++) {
-      const currBlock = this.blockchain[i];
-      const prevBlock = this.blockchain[i -1];
+  public isValidChain() {
+    for (let i = 1; i < this._blockchain.length; i++) {
+      const currBlock = this._blockchain[i];
+      const prevBlock = this._blockchain[i -1];
 
       if (currBlock.hash !== currBlock.computeHash()) {
         return false;
