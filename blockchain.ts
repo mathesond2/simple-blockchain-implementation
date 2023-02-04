@@ -32,6 +32,7 @@ class BlockChain {
     accountA: number,
     accountB: number,
   };
+
   constructor(public blockSize: number) {
     this.blockchain = [this.startGenesisBlock()];
     this.blockSize = blockSize;
@@ -47,6 +48,41 @@ class BlockChain {
 
   getLatestBlock() {
     return this.blockchain[this.blockchain.length - 1];
+  }
+
+  getBlockAtAddress(hash: string): Block | undefined {
+    return this.blockchain.find((block: Block) => block.hash === hash);
+  }
+
+  getCurrentBalance(account: Account) {
+    const foundAcct = Object.keys(this.state).find(acct => acct === account);
+    if (foundAcct) {
+      return this.state[foundAcct];
+    }
+  }
+
+  addNewBlock(newBlock: Block) {
+    if (!this.isValidBlock(newBlock)) {
+      return;
+    }
+    newBlock.prevHash = this.getLatestBlock().hash;
+    newBlock.hash = newBlock.computeHash();
+    this.blockchain.push(newBlock);
+    this.state = this.calculateNewState(newBlock.txns);
+  }
+
+  calculateNewState(txns: Txn[]) {
+    let { accountA, accountB } = this.state;
+    txns.map(txn => {
+      if (txn.from === acctA) {
+        accountA -= txn.value;
+        accountB += txn.value;
+      } else {
+        accountB -= txn.value;
+        accountA += txn.value;
+      }
+    });
+    return {accountA, accountB};
   }
 
   isValidBlock(newBlock: Block) {
@@ -81,41 +117,6 @@ class BlockChain {
     return txnValidityList.every(txn => txn === true);
   }
 
-  calculateNewState(txns: Txn[]) {
-    let { accountA, accountB } = this.state;
-    txns.map(txn => {
-      if (txn.from === acctA) {
-        accountA -= txn.value;
-        accountB += txn.value;
-      } else {
-        accountB -= txn.value;
-        accountA += txn.value;
-      }
-    });
-    return {accountA, accountB};
-  }
-
-  addNewBlock(newBlock: Block) {
-    if (!this.isValidBlock(newBlock)) {
-      return;
-    }
-    newBlock.prevHash = this.getLatestBlock().hash;
-    newBlock.hash = newBlock.computeHash();
-    this.blockchain.push(newBlock);
-    this.state = this.calculateNewState(newBlock.txns);
-  }
-
-  getBlock(hash: string): Block | undefined {
-    return this.blockchain.find((block: Block) => block.hash === hash);
-  }
-
-  getCurrentBalance(account: Account) {
-    const foundAcct = Object.keys(this.state).find(acct => acct === account);
-    if (foundAcct) {
-      return this.state[foundAcct];
-    }
-  }
-
   isValidChain() {
     for (let i = 1; i < this.blockchain.length; i++) {
       const currBlock = this.blockchain[i];
@@ -146,8 +147,10 @@ chain.addNewBlock(b);
 // chain.addNewBlock(c);
 const acctBalance = chain.getCurrentBalance(acctB);
 
+
 console.log(chain);
 console.log('acctBalance', acctBalance);
 console.log(`is valid chain: ${chain.isValidChain()}`);
 
+console.log('block at last address', chain.getBlockAtAddress('1a3f3c893709c2f98bfaf9df36d4a90609388e16547007c6d6170f3f227e7509'));
 export default {};
