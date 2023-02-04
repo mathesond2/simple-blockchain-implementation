@@ -1,42 +1,14 @@
-import * as sha256 from 'crypto-js/sha256';
+import Block from './block';
+import type { Txn, Account } from './util/types';
 
-type Account = 'accountA' | 'accountB';
-
-type Txn = {
-  from: Account,
-  to: Account,
-  value: number,
-};
-interface iBlock {
-  hash: string;
-  txns: Txn[];
-  prevHash: string;
-  computeHash(): string;
-}
+const acctA = 'accountA';
+const acctB = 'accountB';
 
 interface iBlockChain {
   getLatestBlock(): Block;
   getBlockAtAddress(hash: string): Block | undefined;
   addBlock(newBlock: Block): void;
   isValidChain(): boolean;
-}
-
-const acctA = 'accountA';
-const acctB = 'accountB';
-class Block implements iBlock {
-  hash: string;
-  constructor(
-    public txns: Txn[],
-    public prevHash: string = '',
-  ) {
-    this.txns = txns;
-    this.prevHash = prevHash;
-    this.hash = this.computeHash();
-  }
-
-  public computeHash(): string {
-    return sha256(this.prevHash + JSON.stringify(this.txns)).toString();
-  }
 }
 
 class BlockChain implements iBlockChain {
@@ -152,18 +124,17 @@ const b = new Block([{from: acctB, to: acctA, value: 1}])
 // const c = new Block({from: acctB, to: acctA, value: 1})
 
 const chain = new BlockChain(1);
-const lastBlock = chain.getBlockAtAddress('1a3f3c893709c2f98bfaf9df36d4a90609388e16547007c6d6170f3f227e7509')
-
 chain.addBlock(a);
 chain.addBlock(b);
 // chain.addBlock(c);
-const acctBalance = chain.getCurrentBalance(acctB);
 
 
 console.log(chain);
-console.log('acctBalance', acctBalance);
-console.log(`is valid chain: ${chain.isValidChain()}`);
 
-console.log('lastBlock', lastBlock);
+console.log('A account Balance', chain.getCurrentBalance(acctA));
+console.log('B account Balance', chain.getCurrentBalance(acctB));
+
+console.log(`is valid chain: ${chain.isValidChain()}`);
+console.log('lastBlock', chain.getBlockAtAddress('1a3f3c893709c2f98bfaf9df36d4a90609388e16547007c6d6170f3f227e7509'));
 
 export default {};
