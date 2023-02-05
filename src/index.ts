@@ -1,5 +1,5 @@
-import Block from './util/components/Block';
-import Blockchain from './util/components/Blockchain';
+import Block from './components/Block';
+import Blockchain from './components/Blockchain';
 import { seedUUID } from './util/constants';
 import * as crypto from 'crypto';
 

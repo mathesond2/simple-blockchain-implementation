@@ -1,6 +1,6 @@
 import Block from './Block';
-import type { Tx } from '../types';
-import { seedUUID } from '../constants';
+import type { Tx } from '../util/types';
+import { seedUUID } from '../util/constants';
 interface iBlockchain {
   getLatestBlock(): Block;
   getBlockAtAddress(hash: string): Block | undefined;

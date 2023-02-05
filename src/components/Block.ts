@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import type { Tx } from '../types';
+import type { Tx } from '../util/types';
 
 interface iBlock {
   hash: string;
