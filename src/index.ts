@@ -10,6 +10,7 @@ const c = new Block([{from: newUUID, to: seedUUID, value: 1}]);
 const d = new Block([{from: seedUUID, to: seedUUID, value: 1}]);
 
 const chain = new Blockchain(1);
+
 chain.addBlock(a);
 chain.addBlock(b);
 chain.addBlock(c);
@@ -22,6 +23,6 @@ console.log('newUUID account Balance', chain.getCurrentBalance(newUUID));
 console.log('C account Balance', chain.getCurrentBalance('account C'));
 
 console.log(`is valid chain: ${chain.isValidChain()}`);
-console.log('lastBlock', chain.getBlockAtAddress('d8cb0b18c822c5715b81ff498d0309041ac168b92218b4c40754adef62f8c48f'));
+console.log('firstBlock', chain.getBlockAtAddress('e10808d43975dc400731053386849f864f297e6c4f7519c380f3dbaf7067a840')); //hardcoded, as we have know the hash via the seedUUID const
 
 export default {};
