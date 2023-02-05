@@ -1,7 +1,7 @@
 import Block from './Block';
-import type { Tx } from '../util/types';
-import { seedUUID } from '../util/constants';
-interface iBlockChain {
+import type { Tx } from '../types';
+import { seedUUID } from '../constants';
+interface iBlockchain {
   getLatestBlock(): Block;
   getBlockAtAddress(hash: string): Block | undefined;
   addBlock(newBlock: Block): void;
@@ -10,7 +10,7 @@ interface iBlockChain {
 
 type StateAccount = {[address: string]: number};
 
-export default class BlockChain implements iBlockChain {
+export default class Blockchain implements iBlockchain {
   private _blockchain: Block[];
   private _state: StateAccount[];
 

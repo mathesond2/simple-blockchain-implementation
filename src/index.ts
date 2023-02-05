@@ -1,5 +1,5 @@
-import Block from './components/Block';
-import BlockChain from './components/BlockChain';
+import Block from './util/components/Block';
+import Blockchain from './util/components/Blockchain';
 import { seedUUID } from './util/constants';
 import * as crypto from 'crypto';
 
@@ -9,7 +9,7 @@ const b = new Block([{from: newUUID, to: seedUUID, value: 1}]);
 const c = new Block([{from: newUUID, to: seedUUID, value: 1}]);
 const d = new Block([{from: seedUUID, to: seedUUID, value: 1}]);
 
-const chain = new BlockChain(1);
+const chain = new Blockchain(1);
 chain.addBlock(a);
 chain.addBlock(b);
 chain.addBlock(c);
